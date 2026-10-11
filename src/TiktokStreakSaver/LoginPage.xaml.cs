@@ -71,6 +71,41 @@ public partial class LoginPage : ContentPage
         await Done(showSuccessAlert: false);
 #endif
     }
+    
+private async void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
+{
+    if (!Uri.TryCreate(e.Url, UriKind.Absolute, out var uri))
+    {
+        e.Cancel = true;
+        return;
+    }
+
+    if (uri.Scheme == Uri.UriSchemeHttp ||
+        uri.Scheme == Uri.UriSchemeHttps)
+    {
+        return;
+    }
+
+    // Custom app links should not load as web pages.
+    e.Cancel = true;
+
+    if (uri.Scheme.Equals("snssdk1233",
+            StringComparison.OrdinalIgnoreCase) ||
+        uri.Scheme.Equals("tiktok",
+            StringComparison.OrdinalIgnoreCase))
+    {
+        try
+        {
+            await Launcher.Default.TryOpenAsync(uri);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Could not open TikTok link: {ex.Message}");
+        }
+    }
+}
+
 
     private async void OnWebViewNavigated(object? sender, WebNavigatedEventArgs e)
     {
